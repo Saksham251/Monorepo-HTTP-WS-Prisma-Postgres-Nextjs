@@ -1,0 +1,32 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  redeploy_deploy:
+    name: Redeploy everything to the staging cluster
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ssh_key
+          chmod 600 ssh_key
+
+      - name: Deploy to server
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@13.126.48.48 "
+            cd Monorepo-HTTP-WS-Prisma-Postgres-Nextjs && \
+            git pull && \
+            pnpm install && \
+            pnpm build && \
+            pm2 restart fe-server && \
+            pm2 restart ws-server && \
+            pm2 restart http-server
+          "
