@@ -22,11 +22,20 @@ jobs:
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key ubuntu@13.233.86.167 "
-            export PATH=/home/ubuntu/.nvm/versions/node/v22.20.0/bin:\$PATH && \
-            cd Monorepo-HTTP-WS-Prisma-Postgres-Nextjs && \
+           export PATH=/home/ubuntu/.nvm/versions/node/v22.20.0/bin:\$PATH && \
+
+            # Navigate to repo root
+            cd ~/Monorepo-HTTP-WS-Prisma-Postgres-Nextjs && \
+            pnpm install && \
+
+            # FRONTEND: navigate to apps/web
+            cd apps/web && \
             pnpm install && \
             pnpm build && \
             pm2 restart fe-server && \
+
+            # BACKEND servers
+            cd ../.. && \
             pm2 restart ws-server && \
             pm2 restart http-server
           "
